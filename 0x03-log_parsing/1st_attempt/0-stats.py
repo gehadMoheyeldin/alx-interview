@@ -1,48 +1,40 @@
 #!/usr/bin/python3
-"""
-Script that reads stdin line by line and computes metrics
-"""
+""" A script that reads stdin line by line and computes metrics """
 
 import sys
 
 
-if __name__ == "__main__":
-    st_code = {"200": 0,
-               "301": 0,
-               "400": 0,
-               "401": 0,
-               "403": 0,
-               "404": 0,
-               "405": 0,
-               "500": 0}
-    count = 1
-    file_size = 0
+def print_status(dict, size):
+    """Print the format"""
+    print("File size: {}".format(size))
+    for key in sorted(dict.keys()):
+        if dict[key] != 0:
+            print("{}: {}".format(key, dict[key]))
 
-    def parse_line(line):
-        """ Read, parse and grab data"""
-        try:
-            parsed_line = line.split()
-            status_code = parsed_line[-2]
-            if status_code in st_code.keys():
-                st_code[status_code] += 1
-            return int(parsed_line[-1])
-        except Exception:
-            return 0
+status_dict = {'200': 0, '301': 0, '400': 0, '401': 0, '403': 0,
+            '404': 0, '405': 0, '500': 0}
+file_size = 0
+count = 0
 
-    def print_stats():
-        """print stats in ascending order"""
-        print("File size: {}".format(file_size))
-        for key in sorted(st_code.keys()):
-            if st_code[key]:
-                print("{}: {}".format(key, st_code[key]))
+try:
+    for line in sys.stdin:
+        if count != 0 and count % 10 == 0:
+            print_status(status_dict, file_size)
 
-    try:
-        for line in sys.stdin:
-            file_size += parse_line(line)
-            if count % 10 == 0:
-                print_stats()
+            el = line.split(" ")
             count += 1
-    except KeyboardInterrupt:
-        print_stats()
-        raise
-    print_stats()
+
+try:
+    file_size += int(el[-1])
+except:
+    pass
+
+try:
+    if el[-2] in status_dict.keys():
+        status_dict[el[-2]] += 1 
+except:
+    pass
+print_status(status_dict, file_size)
+except KeyboardInterrupt:
+    print_status(status_dict, file_size)
+    raise
